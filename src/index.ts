@@ -22,4 +22,6 @@ try {
   lexer.setInput(data).lex();
 
   console.log(JSON.stringify(tokens, null, 2));
-} catch {}
+} catch (e) {
+  console.error(e);
+}

@@ -103,7 +103,18 @@ const KeywordToken: TokenDefinition = {
   token: "KEYWORD",
 };
 
+const LineCommentToken: TokenDefinition = {
+  regex: /--.*$/gm,
+};
+
+const MultiLineToken: TokenDefinition = {
+  regex: /\(\*.*?\*\)/gs,
+};
+
 export const allTokens: TokenDefinition[] = [
+  MultiLineToken,
+  LineCommentToken,
+
   KeywordToken,
   OperatorToken,
   BooleanToken,
