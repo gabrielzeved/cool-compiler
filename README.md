@@ -4,10 +4,6 @@
 
 - Após clonar o repositório rodar o comando `yarn` para instalar as dependências.
 
-- Rodar o comando `yarn add typescript` para instalar o módulo do typescript.
-
-- Rodar o comando `npm install lex` para instalar a ferramenta [Lexer](https://github.com/aaditmshah/lexer)
-
 - Rodar o comando `yarn start` para iniciar o programa.
 
 <hr>
