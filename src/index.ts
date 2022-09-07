@@ -6,7 +6,7 @@ import { allTokens } from "./lexer/tokens";
 
 try {
   const data = fs.readFileSync(
-    path.resolve("./src/cool_files/hello_world.cl"),
+    path.resolve("./src/cool_files/testes.cl"),
     "utf8"
   );
 
