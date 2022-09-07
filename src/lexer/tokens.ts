@@ -20,6 +20,7 @@ const symbols = "{}();:,";
 const operators = [
   "isvoid",
   "not",
+  "=>",
   "<-",
   "<=",
   "-",
