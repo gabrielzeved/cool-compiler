@@ -1,3 +1,6 @@
+// type OperationToken = "PLUS" | "MINUS" | "TIMES" | "DIVISION";
+// type TypeToken = "CLASS" | "INTEGER" | "STRING" | "IDENTIFIER" | ""
+
 type Token =
   | "CLASS"
   | "IDENTIFIER"
@@ -11,11 +14,18 @@ type Token =
   | "BOOLEAN";
 
 type TokenDefinition = {
-  regex: RegExp;
+  regex: string;
   token?: Token;
 };
 
-const symbols = "{}();:,";
+const symbols = [`\\{`, `\\}`, `\\(`, `\\)`, `;`, `\\:`, `,`];
+
+const SymbolsTokens = symbols.map((char) => {
+  return {
+    regex: char,
+    token: "SYMBOL",
+  } as TokenDefinition;
+});
 
 const operators = [
   "isvoid",
@@ -34,7 +44,15 @@ const operators = [
   "\\+",
 ];
 
+const OperatorsTokens = operators.map((op) => {
+  return {
+    regex: op,
+    token: "OPERATOR",
+  } as TokenDefinition;
+});
+
 const keywords = [
+  "inherits",
   "else",
   "fi",
   "if",
@@ -50,78 +68,68 @@ const keywords = [
   "of",
 ];
 
+const KeywordsTokens = keywords.map((kw) => {
+  return {
+    regex: kw,
+    token: "KEYWORD",
+  } as TokenDefinition;
+});
+
 const ClassToken: TokenDefinition = {
-  regex: /(class)/,
+  regex: "class",
   token: "CLASS",
 };
 
-const InheritsToken: TokenDefinition = {
-  regex: /(inherits)/,
-  token: "INHERITS",
-};
-
 const WhiteSpaceToken: TokenDefinition = {
-  regex: /[\n\f\t\r\v\s]+/,
+  regex: `\f|\r|\t|\v|\ `,
 };
 
 const TypeToken: TokenDefinition = {
-  regex: /[A-Z][A-Za-z0-9_]*/,
+  regex: "[A-Z][A-Za-z_0-9]*",
   token: "TYPE",
 };
 
 const IdentifierToken: TokenDefinition = {
-  regex: /[a-z][A-Za-z0-9_]*/,
+  regex: "[a-z][A-Za-z_0-9]*",
   token: "IDENTIFIER",
 };
 
-const SymbolToken: TokenDefinition = {
-  regex: new RegExp(`[${symbols}]`),
-  token: "SYMBOL",
-};
-
 const StringToken: TokenDefinition = {
-  regex: /"(.*?)"/,
+  regex: '"(.*?)"',
   token: "STRING",
 };
 
 const IntegerToken: TokenDefinition = {
-  regex: /[0-9]+/,
+  regex: "[0-9]+",
   token: "INTEGER",
 };
 
-const OperatorToken: TokenDefinition = {
-  regex: new RegExp(`(${operators.join("|")})`),
-  token: "OPERATOR",
-};
-
 const BooleanToken: TokenDefinition = {
-  regex: /(true|false)/,
+  regex: "(true|false)",
   token: "BOOLEAN",
 };
 
 const KeywordToken: TokenDefinition = {
-  regex: new RegExp(`(${keywords.join("|")})`),
+  regex: `(${keywords.join("|")})`,
   token: "KEYWORD",
 };
 
 const LineCommentToken: TokenDefinition = {
-  regex: /--.*$/gm,
+  regex: "--.*$",
 };
 
-const MultiLineToken: TokenDefinition = {
-  regex: /\(\*.*?\*\)/gs,
+const NewLineToken: TokenDefinition = {
+  regex: `\n+`,
 };
 
 export const allTokens: TokenDefinition[] = [
-  MultiLineToken,
+  //MultiLineToken,
   LineCommentToken,
 
-  KeywordToken,
-  OperatorToken,
   BooleanToken,
 
   ClassToken,
-  InheritsToken,
+  //InheritsToken,
 
   TypeToken,
   IdentifierToken,
@@ -129,6 +137,10 @@ export const allTokens: TokenDefinition[] = [
   StringToken,
   IntegerToken,
 
-  SymbolToken,
+  ...KeywordsTokens,
+  ...OperatorsTokens,
+
+  ...SymbolsTokens,
   WhiteSpaceToken,
+  NewLineToken,
 ];
