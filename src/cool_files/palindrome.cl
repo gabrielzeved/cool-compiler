@@ -11,6 +11,7 @@ class Main inherits IO {
     };
 
     i : Int;
+
     main() : SELF_TYPE {
 	{
             i <- ~1;

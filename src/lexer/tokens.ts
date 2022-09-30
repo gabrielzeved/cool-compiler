@@ -1,79 +1,132 @@
-// type OperationToken = "PLUS" | "MINUS" | "TIMES" | "DIVISION";
-// type TypeToken = "CLASS" | "INTEGER" | "STRING" | "IDENTIFIER" | ""
+type OperatorToken =
+  | "PLUS"
+  | "MINUS"
+  | "TIMES"
+  | "DIVISION"
+  | "ASSIGNMENT"
+  | "ISVOID"
+  | "NOT"
+  | "LEQ"
+  | "LT"
+  | "EQUAL"
+  | "AT"
+  | "NOT"
+  | "DOT"
+  | "COMPLEMENT"
+  | "ARROW";
 
-type Token =
+type TypesToken =
   | "CLASS"
-  | "IDENTIFIER"
-  | "TYPE"
-  | "INHERITS"
-  | "SYMBOL"
-  | "STRING"
   | "INTEGER"
-  | "KEYWORD"
-  | "OPERATOR"
+  | "STRING"
+  | "IDENTIFIER"
+  | "SELF_TYPE"
+  | "TYPE"
   | "BOOLEAN";
 
+type KeywordToken =
+  | "INHERITS"
+  | "ELSE"
+  | "FI"
+  | "IF"
+  | "IN"
+  | "LET"
+  | "LOOP"
+  | "POOL"
+  | "THEN"
+  | "WHILE"
+  | "CASE"
+  | "ESAC"
+  | "NEW"
+  | "OF"
+  | "SELF";
+
+type Token = OperatorToken | KeywordToken | TypesToken | SymbolToken;
+
 type TokenDefinition = {
-  regex: string;
+  regex: string | RegExp;
   token?: Token;
 };
 
-const symbols = [`\\{`, `\\}`, `\\(`, `\\)`, `;`, `\\:`, `,`];
+type SymbolToken =
+  | "LBRAC"
+  | "RBRAC"
+  | "LPAREN"
+  | "RPAREN"
+  | "COLON"
+  | "SEMICOLON"
+  | "COMMA";
 
-const SymbolsTokens = symbols.map((char) => {
+const symbols: [string, SymbolToken][] = [
+  [`\\{`, "LBRAC"],
+  [`\\}`, "RBRAC"],
+  [`\\(`, "LPAREN"],
+  [`\\)`, "RPAREN"],
+  [`;`, "SEMICOLON"],
+  [`\\:`, "COLON"],
+  [`,`, "COMMA"],
+];
+
+const SymbolsTokens = symbols.map((token) => {
   return {
-    regex: char,
-    token: "SYMBOL",
+    regex: token[0],
+    token: token[1],
   } as TokenDefinition;
 });
 
-const operators = [
-  "isvoid",
-  "not",
-  "=>",
-  "<-",
-  "<=",
-  "-",
-  "<",
-  "=",
-  "@",
-  "~",
-  "/",
-  "\\.",
-  "\\*",
-  "\\+",
+const operators: [string, OperatorToken][] = [
+  ["isvoid\\b", "ISVOID"],
+  ["not\\b", "NOT"],
+  ["<-", "ASSIGNMENT"],
+  ["=>", "ARROW"],
+  ["<=", "LEQ"],
+  ["-", "MINUS"],
+  ["<", "LT"],
+  ["=", "EQUAL"],
+  ["@", "AT"],
+  ["~", "COMPLEMENT"],
+  ["/", "DIVISION"],
+  ["\\.", "DOT"],
+  ["\\*", "TIMES"],
+  ["\\+", "PLUS"],
 ];
 
 const OperatorsTokens = operators.map((op) => {
   return {
-    regex: op,
-    token: "OPERATOR",
+    regex: op[0],
+    token: op[1],
   } as TokenDefinition;
 });
 
-const keywords = [
-  "inherits",
-  "else",
-  "fi",
-  "if",
-  "in",
-  "let",
-  "loop",
-  "pool",
-  "then",
-  "while",
-  "case",
-  "esac",
-  "new",
-  "of",
+const keywords: [string, KeywordToken][] = [
+  ["self\\b", "SELF"],
+  ["inherits\\b", "INHERITS"],
+  ["else\\b", "ELSE"],
+  ["fi\\b", "FI"],
+  ["if\\b", "IF"],
+  ["in\\b", "IN"],
+  ["let\\b", "LET"],
+  ["loop\\b", "LOOP"],
+  ["pool\\b", "POOL"],
+  ["then\\b", "THEN"],
+  ["while\\b", "WHILE"],
+  ["case\\b", "CASE"],
+  ["esac\\b", "ESAC"],
+  ["new\\b", "NEW"],
+  ["of\\b", "OF"],
 ];
 
 const KeywordsTokens = keywords.map((kw) => {
   return {
-    regex: kw,
-    token: "KEYWORD",
+    regex: kw[0],
+    token: kw[1],
   } as TokenDefinition;
 });
+
+// const SelfTypeToken: TokenDefinition = {
+//   regex: "SELF_TYPE\\b",
+//   token: "SELF_TYPE",
+// };
 
 const ClassToken: TokenDefinition = {
   regex: "class",
@@ -109,13 +162,12 @@ const BooleanToken: TokenDefinition = {
   token: "BOOLEAN",
 };
 
-const KeywordToken: TokenDefinition = {
-  regex: `(${keywords.join("|")})`,
-  token: "KEYWORD",
+const LineCommentToken: TokenDefinition = {
+  regex: "--.*\n?",
 };
 
-const LineCommentToken: TokenDefinition = {
-  regex: "--.*$",
+const MultiLineCommentToken: TokenDefinition = {
+  regex: /\(\*.*?\*\)/gs,
 };
 
 const NewLineToken: TokenDefinition = {
@@ -124,12 +176,13 @@ const NewLineToken: TokenDefinition = {
 
 export const allTokens: TokenDefinition[] = [
   //MultiLineToken,
+  MultiLineCommentToken,
   LineCommentToken,
 
   BooleanToken,
 
   ClassToken,
-  //InheritsToken,
+  ...KeywordsTokens,
 
   TypeToken,
   IdentifierToken,
@@ -137,7 +190,6 @@ export const allTokens: TokenDefinition[] = [
   StringToken,
   IntegerToken,
 
-  ...KeywordsTokens,
   ...OperatorsTokens,
 
   ...SymbolsTokens,
