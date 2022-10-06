@@ -41,7 +41,7 @@ const expression = [
 const expression_group = [
   [
     "LPAREN expression RPAREN",
-    `$ = {
+    `$$ = {
       node_type: 'group',
       expression: $2,
     }`,

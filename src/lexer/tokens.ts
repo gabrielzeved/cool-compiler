@@ -167,7 +167,7 @@ const LineCommentToken: TokenDefinition = {
 };
 
 const MultiLineCommentToken: TokenDefinition = {
-  regex: /\(\*.*?\*\)/gs,
+  regex: "\\(\\*.*?\\*\\)",
 };
 
 const NewLineToken: TokenDefinition = {
