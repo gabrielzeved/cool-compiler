@@ -5,27 +5,6 @@ import { bnf_definition } from "./parser";
 import { GlobalScope, Node, Semantic } from "./semantic";
 //var JisonLex = require("jison-lex");
 var Jison = require("jison");
-// try {
-//   const data = fs.readFileSync(
-//     path.resolve("./src/cool_files/testes.cl"),
-//     "utf8"
-//   );
-
-//   const tokens: String[] = [];
-//   let lexer = new Lexer();
-
-//   allTokens.forEach((token) => {
-//     lexer.addRule(token.regex, (char: string) => {
-//       if (token.token) tokens.push(`${token.token} : ${char}`);
-//     });
-//   });
-
-//   lexer.setInput(data).lex();
-
-//   console.log(JSON.stringify(tokens, null, 2));
-// } catch (e) {
-//   console.error(e);
-// }
 
 try {
   const data = fs.readFileSync(

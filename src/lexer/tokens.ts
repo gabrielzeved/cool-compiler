@@ -123,11 +123,6 @@ const KeywordsTokens = keywords.map((kw) => {
   } as TokenDefinition;
 });
 
-// const SelfTypeToken: TokenDefinition = {
-//   regex: "SELF_TYPE\\b",
-//   token: "SELF_TYPE",
-// };
-
 const ClassToken: TokenDefinition = {
   regex: "class",
   token: "CLASS",
@@ -175,7 +170,6 @@ const NewLineToken: TokenDefinition = {
 };
 
 export const allTokens: TokenDefinition[] = [
-  //MultiLineToken,
   MultiLineCommentToken,
   LineCommentToken,
 
