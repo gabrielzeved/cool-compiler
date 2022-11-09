@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import util from "util";
 import { allTokens } from "./lexer/tokens";
 import { bnf_definition } from "./parser";
+import { GlobalScope, Node, Semantic } from "./semantic";
 //var JisonLex = require("jison-lex");
 var Jison = require("jison");
 // try {
@@ -29,7 +29,7 @@ var Jison = require("jison");
 
 try {
   const data = fs.readFileSync(
-    path.resolve("./src/cool_files/testes.cl"),
+    path.resolve("./src/cool_files/palindrome.cl"),
     "utf8"
   );
 
@@ -42,11 +42,11 @@ try {
     },
 
     operators: [
+      ["right", "ASSIGNMENT"],
+      ["right", "NOT"],
+      ["nonassoc", "LEQ", "LT", "EQUAL"],
       ["left", "PLUS", "MINUS"],
       ["left", "TIMES", "DIVISION"],
-      ["nonassoc", "LEQ", "LT", "EQUAL"],
-      ["right", "NOT"],
-      ["right", "ASSIGNMENT"],
       ["right", "ISVOID"],
       ["right", "COMPLEMENT"],
       ["right", "AT"],
@@ -59,7 +59,12 @@ try {
   var parser = new Jison.Parser(grammar);
   const result = parser.parse(data);
 
-  console.log(util.inspect(result, false, null, true));
+  const globalScope = new GlobalScope();
+  globalScope.parse(result);
+
+  result.forEach((node: Node) => {
+    Semantic.analyze(node, globalScope);
+  });
 
   //var lexer = new JisonLex(grammar.lex);
   //lexer.setInput(data);

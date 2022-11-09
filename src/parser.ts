@@ -1,11 +1,54 @@
 // PRIMITIVES
-const boolean = [["BOOLEAN", "$$ = $1"]];
-const string = [["STRING", "$$ = $1"]];
-const integer = [["INTEGER", "$$ = $1"]];
+const boolean = [
+  [
+    "BOOLEAN",
+    `$$ = {
+      node_type: 'boolean',
+      value: $1
+    }`,
+  ],
+];
+
+const string = [
+  [
+    "STRING",
+    `$$ = {
+      node_type: 'string',
+      value: $1
+    }`,
+  ],
+];
+
+const integer = [
+  [
+    "INTEGER",
+    `$$ = {
+      node_type: 'integer',
+      value: $1
+    }`,
+  ],
+];
 
 // IDENTIFIER
-const id = [["IDENTIFIER", "$$ = $1"]];
-const self = [["SELF", "$$ = $1"]];
+const id = [
+  [
+    "IDENTIFIER",
+    `$$ = {
+      node_type: 'identifier',
+      value: $1
+    }`,
+  ],
+];
+
+const self = [
+  [
+    "SELF",
+    `$$ = {
+      node_type: 'identifier',
+      value: $1
+    }`,
+  ],
+];
 
 //EXPRESSION
 
@@ -94,7 +137,7 @@ const self_dispatch = [
     `$$ = {
       node_type: 'dispatch',
       type: 'SELF_TYPE',
-      left_expression: 'self',
+      left_expression: { node_type: 'identifier', value: 'self' },
       id: $1,
       parameters: $3,
     }`,
