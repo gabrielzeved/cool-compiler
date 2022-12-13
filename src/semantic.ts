@@ -158,6 +158,7 @@ export type ClassMapValue = {
   name: string;
   inherits?: string;
   methods: Map<MethodMapValue>;
+  attributes: Map<AttributeMapValue>;
 };
 
 export type MethodMapValue = {
@@ -178,15 +179,12 @@ export type Map<T> = { [key: string]: T };
 
 export interface Scope {
   classes: Map<ClassMapValue>;
-  methods: Map<MethodMapValue>;
-  attributes: Map<AttributeMapValue>;
-  self_type?: string;
+  self_type: string;
 }
 
 export class GlobalScope implements Scope {
   classes: Map<ClassMapValue> = {};
-  methods: Map<MethodMapValue> = {};
-  attributes: Map<AttributeMapValue> = {};
+  self_type: string = "";
 
   private objectMethods = {
     abort: {
@@ -218,6 +216,7 @@ export class GlobalScope implements Scope {
     this.classes["Object"] = {
       name: "Object",
       methods: this.objectMethods,
+      attributes: {}
     };
   }
 
@@ -225,6 +224,7 @@ export class GlobalScope implements Scope {
     this.classes["IO"] = {
       name: "IO",
       inherits: "Object",
+      attributes: {},
       methods: {
         in_int: {
           name: "in_int",
@@ -254,6 +254,7 @@ export class GlobalScope implements Scope {
 
   _Bool() {
     this.classes["Bool"] = {
+      attributes: {},
       name: "Bool",
       inherits: "Object",
       methods: {
@@ -264,6 +265,7 @@ export class GlobalScope implements Scope {
 
   _String() {
     this.classes["String"] = {
+      attributes: {},
       name: "String",
       inherits: "Object",
       methods: {
@@ -289,6 +291,7 @@ export class GlobalScope implements Scope {
 
   _Int() {
     this.classes["Int"] = {
+      attributes: {},
       name: "Int",
       inherits: "Object",
       methods: {
@@ -310,6 +313,7 @@ export class GlobalScope implements Scope {
       name: node.type,
       methods: {},
       inherits: node?.inherits ?? "Object",
+      attributes: {},
     };
 
     if (node.body) {
@@ -378,7 +382,7 @@ export namespace Semantic {
   }
 
   function formal(node: FormalNode, scope: Scope) {
-    scope.attributes[node.id.value] = {
+    scope.classes[scope.self_type].attributes[node.id.value] = {
       name: node.id.value,
       type: node.type,
     };
@@ -431,9 +435,9 @@ export namespace Semantic {
   }
 
   function case_branch(node: CaseBranchNode, _scope: Scope) {
-    const scope = structuredClone(_scope);
+    const scope = structuredClone(_scope) as Scope;
 
-    scope.attributes[node.id.value] = {
+    scope.classes[scope.self_type].attributes[node.id.value] = {
       name: node.id.value,
       type: node.type,
     };
@@ -488,11 +492,11 @@ export namespace Semantic {
     }
 
     assert(
-      !scope.attributes[node.id.value],
+      !scope.classes[scope.self_type].attributes[node.id.value],
       `attribute ${node.id.value} already defined`
     );
 
-    scope.attributes[node.id.value] = {
+    scope.classes[scope.self_type].attributes[node.id.value] = {
       name: node.id.value,
       type: node.type,
     };
@@ -504,10 +508,10 @@ export namespace Semantic {
     if (node.value === "self") return scope.self_type!;
 
     assert(
-      scope.attributes[node.value],
+      scope.classes[scope.self_type].attributes[node.value],
       `attribute ${node.value} is not defined`
     );
-    return scope.attributes[node.value].type;
+    return scope.classes[scope.self_type].attributes[node.value].type;
   }
 
   function _class(node: ClassNode, _scope: Scope) {
@@ -524,13 +528,13 @@ export namespace Semantic {
     assert(scope.classes[node.inherits], `${node.inherits} is not defined`);
     //TODO: ADD INHERITS METHODS INSIDE SCOPE
     scope.methods = {
-      ...scope.methods,
       ...scope.classes[node.inherits].methods,
+      ...scope.methods,
     };
 
     scope.classes[node.type].methods = {
-      ...scope.classes[node.type].methods,
       ...scope.classes[node.inherits].methods,
+      ...scope.classes[node.type].methods,
     };
 
     if (node.body) {
@@ -552,12 +556,12 @@ export namespace Semantic {
       assertIsAssignable(node.type, initializationType, scope);
     }
 
-    // assert(
-    //   !scope.attributes[node.id.value],
-    //   `attribute ${node.id.value} already defined`
-    // );
+    assert(
+      !scope.classes[scope.self_type].attributes[node.id.value],
+      `attribute ${node.id.value} already defined`
+    );
 
-    scope.attributes[node.id.value] = {
+    scope.classes[scope.self_type].attributes[node.id.value] = {
       name: node.id.value,
       type: node.type,
     };

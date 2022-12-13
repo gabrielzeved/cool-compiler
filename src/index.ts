@@ -1,5 +1,7 @@
 import fs from "fs";
 import path from "path";
+import { inspect } from "util";
+import { generateCode } from "./code_generation";
 import { allTokens } from "./lexer/tokens";
 import { bnf_definition } from "./parser";
 import { GlobalScope, Node, Semantic } from "./semantic";
@@ -7,10 +9,7 @@ import { GlobalScope, Node, Semantic } from "./semantic";
 var Jison = require("jison");
 
 try {
-  const data = fs.readFileSync(
-    path.resolve("./src/cool_files/palindrome.cl"),
-    "utf8"
-  );
+  const data = fs.readFileSync(path.resolve("./src/cool_files/add.cl"), "utf8");
 
   var grammar = {
     lex: {
@@ -44,6 +43,13 @@ try {
   result.forEach((node: Node) => {
     Semantic.analyze(node, globalScope);
   });
+  console.clear();
+
+  console.log(inspect(result, false, null, true));
+
+  const code = generateCode(result, globalScope);
+
+  fs.writeFileSync("src/bril_tests/add.json", JSON.stringify(code), "utf-8");
 
   //var lexer = new JisonLex(grammar.lex);
   //lexer.setInput(data);
