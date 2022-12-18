@@ -6,9 +6,11 @@ import {
   Program,
   Type,
 } from "./lib/bril-ts/bril";
+
 import {
   ArithmeticNode,
   AssignmentNode,
+  AttributeMapValue,
   AttributeNode,
   BlockNode,
   BoolNode,
@@ -16,6 +18,7 @@ import {
   ComparisionNode,
   DispatchNode,
   GlobalScope,
+  GroupNode,
   IdentifierNode,
   IfNode,
   IntNode,
@@ -65,6 +68,20 @@ function findFirstParentMethodDefinition(
   return null;
 }
 
+function getAllAttributes(type: string, scope: Scope) {
+  let currentType: string | undefined =
+    type === "SELF_TYPE" ? scope.self_type : type;
+
+  const attributes: AttributeMapValue[] = [];
+  while (!!currentType) {
+    attributes.push(
+      ...Object.values(scope.classes[currentType].attributes).reverse()
+    );
+    currentType = scope.classes[currentType].inherits;
+  }
+  return attributes.reverse();
+}
+
 const main_instance: Instruction[] = [
   {
     dest: "size",
@@ -104,6 +121,13 @@ function methodBril(node: MethodNode, scope: Scope): [Function, string] {
     instructions.push(...main_instance);
   } else {
     args.push({ name: "this", type: { ptr: "int" } });
+
+    node.parameters.forEach((arg) => {
+      args.push({
+        name: arg.id.value,
+        type: coolType2BrilType(arg.type),
+      });
+    });
   }
 
   let _return;
@@ -153,10 +177,22 @@ const resolvers: { [key: string]: ResolverFunction } = {
   if: ifBril,
   new: newBril,
   attribute: attributeBril,
+  group: groupBril,
 };
 
 function nodeToInstruction(node: Node, scope: Scope): BrilInstruction {
-  return resolvers[node.node_type as keyof typeof resolvers](node, scope);
+  const instruction = resolvers[node.node_type as keyof typeof resolvers](
+    node,
+    scope
+  );
+
+  // console.log(node.node_type, inspect(instruction, false, null, true));
+  return instruction;
+}
+
+function groupBril(node: GroupNode, scope: Scope): BrilInstruction {
+  const expression = nodeToInstruction(node.expression, scope);
+  return expression;
 }
 
 function attributeBril(node: AttributeNode, scope: Scope): BrilInstruction {
@@ -167,9 +203,9 @@ function attributeBril(node: AttributeNode, scope: Scope): BrilInstruction {
 
   const instructions: Instruction[] = [];
 
-  const index = Object.keys(
-    scope.classes[scope.self_type].attributes
-  ).findIndex((attr) => attr === node.id.value);
+  const index = getAllAttributes(scope.self_type, scope).findIndex(
+    (attr) => attr.name === node.id.value
+  );
 
   if (index < 0) {
     throw new Error("Attribute not defined");
@@ -216,9 +252,7 @@ function newBril(node: NewNode, scope: Scope): BrilInstruction {
 
   const destination = `new_${temp_var}`;
 
-  const attributes = Object.values(
-    scope.classes[scope.self_type].attributes
-  ).filter((attribute) => attribute.type === node.type);
+  const attributes = getAllAttributes(node.type, scope);
 
   instructions.push({
     dest: `${destination}_size`,
@@ -372,20 +406,18 @@ function identifierBril(node: IdentifierNode, scope: Scope): BrilInstruction {
     };
   }
 
+  const attributes = getAllAttributes(scope.self_type, scope);
+
   // CLASS ATTRIBUTE
-  if (
-    Object.keys(scope.classes[scope.self_type].attributes).includes(node.value)
-  ) {
-    const index = Object.keys(
-      scope.classes[scope.self_type].attributes
-    ).findIndex((attr) => attr === node.value);
+  if (attributes.some((attr) => attr.name === node.value)) {
+    const index = attributes.findIndex((attr) => attr.name === node.value);
 
     instructions.push(
       {
         dest: `temp_${temp_var}`,
         op: "const",
         type: "int",
-        value: 0,
+        value: index,
       },
       {
         args: ["this", `temp_${temp_var}`],
@@ -405,12 +437,14 @@ function identifierBril(node: IdentifierNode, scope: Scope): BrilInstruction {
 
     temp_var++;
   }
-  //THIS NEEDS TO CHANGE
+
+  const variable =
+    attributes.find((attr) => attr.name === node.value)?.type ||
+    lets[node.value];
+
   return {
     instructions,
-    returnType:
-      scope.classes[scope.self_type].attributes[node.value]?.type ||
-      lets[node.value],
+    returnType: variable,
     destination: node.value,
   };
 }
@@ -461,14 +495,14 @@ function assignmentBril(node: AssignmentNode, scope: Scope): BrilInstruction {
   instructions.push(...identifier.instructions);
   const id = identifier.destination;
 
-  const isAttribute = Object.keys(
-    scope.classes[scope.self_type].attributes
-  ).includes(id);
+  const attributes = getAllAttributes(scope.self_type, scope);
+  const isAttribute = attributes.some((attr) => attr.name === id);
 
   if (isAttribute) {
-    const index = Object.keys(
-      scope.classes[scope.self_type].attributes
-    ).findIndex((attr) => attr === id);
+    const index = attributes.findIndex((attr) => attr.name === id);
+
+    //REMOVE THE LOAD INSTRUCTION FROM IDENTIFIER
+    instructions.pop();
 
     instructions.push({
       args: [`attribute_index_${index}`, value.destination],
@@ -647,12 +681,13 @@ function dispatchBril(node: DispatchNode, scope: Scope): BrilInstruction {
 
   const left_expression = nodeToInstruction(node.left_expression, scope);
 
+  instructions.push(...left_expression.instructions);
+
+  const type =
+    node.type === "SELF_TYPE" ? left_expression.returnType : node.type;
+
   //MUDAR PARA TIPAGEM DO LEFT EXPRESSION
-  const methodClass = findFirstParentMethodDefinition(
-    id,
-    left_expression.returnType,
-    scope
-  );
+  const methodClass = findFirstParentMethodDefinition(id, type, scope);
 
   if (!methodClass) throw new Error("Semantic error!");
 

@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { inspect } from "util";
 import { generateCode } from "./code_generation";
 import { allTokens } from "./lexer/tokens";
 import { bnf_definition } from "./parser";
@@ -44,8 +43,6 @@ try {
     Semantic.analyze(node, globalScope);
   });
   console.clear();
-
-  console.log(inspect(result, false, null, true));
 
   const code = generateCode(result, globalScope);
 

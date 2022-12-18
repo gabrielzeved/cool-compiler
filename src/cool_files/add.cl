@@ -1,27 +1,54 @@
-class Test{
-    test: Int <- 2;
-    
-    double() : Int {
-        test * 2
+class Book inherits IO {
+    title : Int;
+    author : Int;
+
+    initBook(title_p : Int, author_p : Int) : Book {
+        {
+            title <- title_p;
+            author <- author_p;
+            self;
+        }
+    };
+
+    print() : Book {
+        {
+            out_int(title);
+            out_int(author);
+            self;
+        }
     };
 };
 
-class Main inherits IO {
-    main() : Object {
-        let i: Int <- 6,
-        	t: Int <- 11,
-	        test: Test <- new Test
-       	in {
-            while i < 10 loop
-            {
-                if i = 7 then
-                	out_int(test.double())
-                else
-                	out_int(2 * i)
-                fi;
-                i <- i + 1;
-            }
-            pool;
+class Article inherits Book {
+    per_title : Int;
+
+    initArticle(title_p : Int, author_p : Int,
+        per_title_p : Int) : Article {
+        {
+            initBook(title_p, author_p);
+            per_title <- per_title_p;
+            self;
         }
+    };
+
+    print() : Book {
+        {
+            self@Book.print();
+            out_int(per_title);
+            self;
+        }
+    };
+};
+
+class Main {
+
+    main() : Object {
+        (let a_book : Book <-
+            (new Article).initArticle(100, 7, 10)
+        in
+            {
+               a_book.print();
+            }
+        )
     };
 };

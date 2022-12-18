@@ -216,7 +216,7 @@ export class GlobalScope implements Scope {
     this.classes["Object"] = {
       name: "Object",
       methods: this.objectMethods,
-      attributes: {}
+      attributes: {},
     };
   }
 
@@ -532,6 +532,12 @@ export namespace Semantic {
       ...scope.methods,
     };
 
+    //ADD NEW METHODS TO THE MAIN SCOPE
+    // _scope.classes[node.type].methods = {
+    //   ..._scope.classes[node.inherits].methods,
+    //   ..._scope.classes[node.type].methods,
+    // };
+
     scope.classes[node.type].methods = {
       ...scope.classes[node.inherits].methods,
       ...scope.classes[node.type].methods,
@@ -588,12 +594,9 @@ export namespace Semantic {
       `class ${leftExpressionType} is not defined`
     );
 
-    assert(
-      scope.classes[leftExpressionType].methods[node.id.value],
-      `method ${node.id.value} is not defined inside the class ${leftExpressionType}`
-    );
+    assertHasMethod(node.id.value, leftExpressionType, scope);
 
-    const method = scope.classes[leftExpressionType].methods[node.id.value];
+    const method = getMethod(node.id.value, leftExpressionType, scope)!;
 
     node.parameters?.forEach((parameter, index) => {
       const expectedType = method.parameters[index];
@@ -743,6 +746,39 @@ export namespace Semantic {
     throw new Error(
       `type "${initialType}" is not assignable to type "${superType}"`
     );
+  }
+
+  function assertHasMethod(methodName: string, type: string, scope: Scope) {
+    let currentType: string | undefined =
+      type === "SELF_TYPE" ? scope.self_type : type;
+
+    while (!!currentType) {
+      const isMethodOwner = Object.keys(
+        scope.classes[currentType].methods
+      ).includes(methodName);
+      if (isMethodOwner) return;
+
+      currentType = scope.classes[currentType].inherits;
+    }
+
+    throw new Error(
+      `method ${methodName} is not defined inside the class ${type}`
+    );
+  }
+
+  function getMethod(methodName: string, type: string, scope: Scope) {
+    let currentType: string | undefined =
+      type === "SELF_TYPE" ? scope.self_type : type;
+
+    while (!!currentType) {
+      const isMethodOwner = Object.keys(
+        scope.classes[currentType].methods
+      ).includes(methodName);
+      if (isMethodOwner) return scope.classes[currentType].methods[methodName];
+
+      currentType = scope.classes[currentType].inherits;
+    }
+    return null;
   }
 
   function assert(value: any, message: string) {

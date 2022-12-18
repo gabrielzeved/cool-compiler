@@ -13,35 +13,83 @@
       "type": { "ptr": "int" }
     },
     {
-      "name": "Test__double",
+      "name": "Book__initBook",
+      "args": [
+        { "name": "this", "type": { "ptr": "int" } },
+        { "name": "title_p", "type": "int" },
+        { "name": "author_p", "type": "int" }
+      ],
+      "instrs": [
+        { "dest": "temp_0", "op": "const", "type": "int", "value": 0 },
+        {
+          "args": ["this", "temp_0"],
+          "dest": "attribute_index_0",
+          "op": "ptradd",
+          "type": { "ptr": "int" }
+        },
+        { "args": ["attribute_index_0", "title_p"], "op": "store" },
+        { "dest": "temp_1", "op": "const", "type": "int", "value": 1 },
+        {
+          "args": ["this", "temp_1"],
+          "dest": "attribute_index_1",
+          "op": "ptradd",
+          "type": { "ptr": "int" }
+        },
+        { "args": ["attribute_index_1", "author_p"], "op": "store" },
+        { "args": ["this"], "op": "ret" }
+      ],
+      "type": { "ptr": "int" }
+    },
+    {
+      "name": "Book__print",
       "args": [{ "name": "this", "type": { "ptr": "int" } }],
       "instrs": [
-        { "dest": "temp_2", "op": "const", "type": "int", "value": 0 },
+        { "dest": "temp_3", "op": "const", "type": "int", "value": 0 },
         {
-          "args": ["this", "temp_2"],
+          "args": ["this", "temp_3"],
           "dest": "attribute_index_0",
           "op": "ptradd",
           "type": { "ptr": "int" }
         },
         {
           "args": ["attribute_index_0"],
-          "dest": "test",
+          "dest": "title",
           "op": "load",
           "type": "int"
         },
-        { "dest": "temp_3", "op": "const", "type": "int", "value": 2 },
         {
-          "args": ["test", "temp_3"],
-          "dest": "temp_1",
-          "op": "mul",
+          "op": "call",
+          "type": { "ptr": "int" },
+          "funcs": ["IO__out_int"],
+          "args": ["this", "title"],
+          "dest": "temp_2"
+        },
+        { "dest": "temp_5", "op": "const", "type": "int", "value": 1 },
+        {
+          "args": ["this", "temp_5"],
+          "dest": "attribute_index_1",
+          "op": "ptradd",
+          "type": { "ptr": "int" }
+        },
+        {
+          "args": ["attribute_index_1"],
+          "dest": "author",
+          "op": "load",
           "type": "int"
         },
-        { "args": ["temp_1"], "op": "ret" }
+        {
+          "op": "call",
+          "type": { "ptr": "int" },
+          "funcs": ["IO__out_int"],
+          "args": ["this", "author"],
+          "dest": "temp_4"
+        },
+        { "args": ["this"], "op": "ret" }
       ],
-      "type": "int"
+      "type": { "ptr": "int" }
     },
     {
-      "name": "Test__constructor",
+      "name": "Book__constructor",
       "instrs": [
         { "dest": "this_0", "op": "const", "type": "int", "value": 0 },
         {
@@ -50,8 +98,91 @@
           "op": "ptradd",
           "type": { "ptr": "int" }
         },
-        { "dest": "temp_0", "op": "const", "type": "int", "value": 2 },
-        { "args": ["attribute_index_0", "temp_0"], "op": "store" },
+        { "dest": "this_0", "op": "const", "type": "int", "value": 1 },
+        {
+          "args": ["this", "this_0"],
+          "dest": "attribute_index_1",
+          "op": "ptradd",
+          "type": { "ptr": "int" }
+        },
+        { "args": ["this"], "op": "ret" }
+      ],
+      "args": [{ "name": "this", "type": { "ptr": "int" } }],
+      "type": { "ptr": "int" }
+    },
+    {
+      "name": "Article__initArticle",
+      "args": [
+        { "name": "this", "type": { "ptr": "int" } },
+        { "name": "title_p", "type": "int" },
+        { "name": "author_p", "type": "int" },
+        { "name": "per_title_p", "type": "int" }
+      ],
+      "instrs": [
+        {
+          "op": "call",
+          "type": { "ptr": "int" },
+          "funcs": ["Book__initBook"],
+          "args": ["this", "title_p", "author_p"],
+          "dest": "temp_6"
+        },
+        { "dest": "temp_7", "op": "const", "type": "int", "value": 2 },
+        {
+          "args": ["this", "temp_7"],
+          "dest": "attribute_index_2",
+          "op": "ptradd",
+          "type": { "ptr": "int" }
+        },
+        { "args": ["attribute_index_2", "per_title_p"], "op": "store" },
+        { "args": ["this"], "op": "ret" }
+      ],
+      "type": { "ptr": "int" }
+    },
+    {
+      "name": "Article__print",
+      "args": [{ "name": "this", "type": { "ptr": "int" } }],
+      "instrs": [
+        {
+          "op": "call",
+          "type": { "ptr": "int" },
+          "funcs": ["Book__print"],
+          "args": ["this"],
+          "dest": "temp_8"
+        },
+        { "dest": "temp_10", "op": "const", "type": "int", "value": 2 },
+        {
+          "args": ["this", "temp_10"],
+          "dest": "attribute_index_2",
+          "op": "ptradd",
+          "type": { "ptr": "int" }
+        },
+        {
+          "args": ["attribute_index_2"],
+          "dest": "per_title",
+          "op": "load",
+          "type": "int"
+        },
+        {
+          "op": "call",
+          "type": { "ptr": "int" },
+          "funcs": ["IO__out_int"],
+          "args": ["this", "per_title"],
+          "dest": "temp_9"
+        },
+        { "args": ["this"], "op": "ret" }
+      ],
+      "type": { "ptr": "int" }
+    },
+    {
+      "name": "Article__constructor",
+      "instrs": [
+        { "dest": "this_6", "op": "const", "type": "int", "value": 2 },
+        {
+          "args": ["this", "this_6"],
+          "dest": "attribute_index_2",
+          "op": "ptradd",
+          "type": { "ptr": "int" }
+        },
         { "args": ["this"], "op": "ret" }
       ],
       "args": [{ "name": "this", "type": { "ptr": "int" } }],
@@ -75,114 +206,45 @@
           "args": ["this"],
           "dest": "this"
         },
-        { "dest": "temp_4", "op": "const", "type": "int", "value": 6 },
-        { "args": ["temp_4"], "dest": "i", "op": "id", "type": "int" },
-        { "dest": "temp_5", "op": "const", "type": "int", "value": 11 },
-        { "args": ["temp_5"], "dest": "t", "op": "id", "type": "int" },
-        { "dest": "new_6_size", "op": "const", "type": "int", "value": 1 },
+        { "dest": "new_11_size", "op": "const", "type": "int", "value": 3 },
         {
-          "args": ["new_6_size"],
-          "dest": "new_6",
+          "args": ["new_11_size"],
+          "dest": "new_11",
           "op": "alloc",
           "type": { "ptr": "int" }
         },
         {
           "op": "call",
           "type": { "ptr": "int" },
-          "funcs": ["Test__constructor"],
-          "args": ["new_6"],
-          "dest": "new_6"
+          "funcs": ["Article__constructor"],
+          "args": ["new_11"],
+          "dest": "new_11"
         },
-        {
-          "args": ["new_6"],
-          "dest": "test",
-          "op": "id",
-          "type": { "ptr": "int" }
-        },
-        { "label": "loop_condition_18" },
-        { "dest": "temp_7", "op": "const", "type": "int", "value": 10 },
-        {
-          "args": ["i", "temp_7"],
-          "dest": "temp_6",
-          "op": "lt",
-          "type": "bool"
-        },
-        {
-          "args": ["temp_6"],
-          "labels": ["loop_body_18", "loop_finish_18"],
-          "op": "br"
-        },
-        { "label": "loop_body_18" },
-        { "label": "if_condition_15" },
-        { "dest": "temp_9", "op": "const", "type": "int", "value": 7 },
-        {
-          "args": ["i", "temp_9"],
-          "dest": "temp_8",
-          "op": "eq",
-          "type": "bool"
-        },
-        {
-          "args": ["temp_8"],
-          "labels": ["if_then_15", "if_else_15"],
-          "op": "br"
-        },
-        { "label": "if_then_15" },
+        { "dest": "temp_12", "op": "const", "type": "int", "value": 100 },
+        { "dest": "temp_13", "op": "const", "type": "int", "value": 7 },
+        { "dest": "temp_14", "op": "const", "type": "int", "value": 10 },
         {
           "op": "call",
-          "type": "int",
-          "funcs": ["Test__double"],
-          "args": ["test"],
+          "type": { "ptr": "int" },
+          "funcs": ["Article__initArticle"],
+          "args": ["new_11", "temp_12", "temp_13", "temp_14"],
           "dest": "temp_11"
         },
         {
-          "op": "call",
-          "type": { "ptr": "int" },
-          "funcs": ["IO__out_int"],
-          "args": ["this", "temp_11"],
-          "dest": "temp_10"
-        },
-        {
-          "args": ["temp_10"],
-          "dest": "if_return_15",
+          "args": ["temp_11"],
+          "dest": "a_book",
           "op": "id",
           "type": { "ptr": "int" }
-        },
-        { "labels": ["if_exit_15"], "op": "jmp" },
-        { "label": "if_else_15" },
-        { "dest": "temp_14", "op": "const", "type": "int", "value": 2 },
-        {
-          "args": ["temp_14", "i"],
-          "dest": "temp_13",
-          "op": "mul",
-          "type": "int"
         },
         {
           "op": "call",
           "type": { "ptr": "int" },
-          "funcs": ["IO__out_int"],
-          "args": ["this", "temp_13"],
-          "dest": "temp_12"
+          "funcs": ["Article__print"],
+          "args": ["a_book"],
+          "dest": "temp_15"
         },
-        {
-          "args": ["temp_12"],
-          "dest": "if_return_15",
-          "op": "id",
-          "type": { "ptr": "int" }
-        },
-        { "labels": ["if_exit_15"], "op": "jmp" },
-        { "label": "if_exit_15" },
-        { "dest": "temp_17", "op": "const", "type": "int", "value": 1 },
-        {
-          "args": ["i", "temp_17"],
-          "dest": "temp_16",
-          "op": "add",
-          "type": "int"
-        },
-        { "args": ["temp_16"], "dest": "i", "op": "id", "type": "int" },
-        { "labels": ["loop_condition_18"], "op": "jmp" },
-        { "label": "loop_finish_18" },
         { "args": ["this"], "op": "free" },
-        { "args": ["temp_6"], "op": "ret" }
+        { "args": ["temp_15"], "op": "ret" }
       ],
       "type": { "ptr": "int" }
     },
