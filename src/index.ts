@@ -8,7 +8,10 @@ import { GlobalScope, Node, Semantic } from "./semantic";
 var Jison = require("jison");
 
 try {
-  const data = fs.readFileSync(path.resolve("./src/cool_files/add.cl"), "utf8");
+  const data = fs.readFileSync(
+    path.resolve("./src/cool_files/book.cl"),
+    "utf8"
+  );
 
   var grammar = {
     lex: {

@@ -41,6 +41,7 @@ interface BrilInstruction {
 
 let temp_var = 0;
 const lets: { [key: string]: string } = {};
+let toFree: string[] = [];
 
 function coolType2BrilType(type: string): Type {
   if (type === "Int") return "int";
@@ -107,6 +108,8 @@ const main_instance: Instruction[] = [
 ];
 
 function methodBril(node: MethodNode, scope: Scope): [Function, string] {
+  toFree = [];
+
   const name =
     node.id.value === "main" && scope.self_type === "Main"
       ? "main"
@@ -148,6 +151,10 @@ function methodBril(node: MethodNode, scope: Scope): [Function, string] {
   if (name === "main") {
     instructions.push({ args: ["this"], op: "free" });
   }
+
+  toFree.forEach((variable) => {
+    instructions.push({ args: [variable], op: "free" });
+  });
 
   return [
     {
@@ -277,6 +284,8 @@ function newBril(node: NewNode, scope: Scope): BrilInstruction {
     args: [destination],
     dest: destination,
   });
+
+  toFree.push(destination);
 
   return {
     destination,
